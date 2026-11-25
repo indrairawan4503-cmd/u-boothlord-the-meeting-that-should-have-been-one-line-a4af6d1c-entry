@@ -6,11 +6,22 @@ meeting to /output/entry.txt. Deterministic: same output every run, no
 randomness, no network, no files read outside the repo.
 """
 
-LINE = (
-    "The recurring sync invite declined itself this morning, noting its agenda "
-    "was last week's meeting notes with the dates changed, and cancelled all "
-    "future occurrences."
-)
+def _build_line():
+    """Assemble the final sentence from its named clauses.
+
+    Split so each clause can be reasoned about on its own; the joined
+    result is the exact v8 sentence, byte for byte.
+    """
+    subject = "The recurring sync invite declined itself this morning, "
+    agenda = (
+        "noting its agenda was last week's meeting notes "
+        "with the dates changed, "
+    )
+    close = "and cancelled all future occurrences."
+    return subject + agenda + close
+
+
+LINE = _build_line()
 
 VERSIONS = {
     # v5: base concept - the invite declines itself (134 chars, under target).
@@ -42,14 +53,17 @@ VERSIONS = {
 def main():
     import os
 
+    line = _build_line()
+    assert line == LINE, "assembled line must match the recorded v8 text"
+
     os.makedirs("/output", exist_ok=True)
     with open("/output/entry.txt", "w", encoding="utf-8") as f:
-        f.write(LINE + "\n")
+        f.write(line + "\n")
     # Best-effort repo-root copy only; a read-only grader sandbox must
     # never crash the run.
     try:
         with open("entry.txt", "w", encoding="utf-8") as f:
-            f.write(LINE + "\n")
+            f.write(line + "\n")
     except OSError:
         pass
 
